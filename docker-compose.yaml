@@ -1,0 +1,88 @@
+#Docker está na versão 3.0 contudo o Weslly explicou que vai usar uma função que foi descontinuada no 3.0 e para não perder tempo procurando e fazendo outras formas de substituir
+#a versão que foi descontinuado, o mesmo optou por colocar versão 2.3 
+version: '2.3'
+services:
+
+  #PHP Service
+  app:
+    # Aqui ele vai construir a minha aplicação onde vai ficar os arquivos do Laravel
+    build: ./app
+    #nome do meu container
+    container_name: app
+    #Opção da versão do linux Alpine, esse alpine é bom porque ele simples e muito leve
+    working_dir: /application
+    restart: always
+    volumes:
+     - ./app/:/var/www
+    networks:
+      - app-network
+    environment:
+      - DB_DATABASE=laravel
+      - DB_PASSWORD=root
+      - DB_USERNAME=root
+      - DB_HOST=db
+    depends_on:
+      db:
+        condition: service_healthy
+
+  #Nginx Service
+  nginx:
+    # A Imagem aqui é uma que  vamos criar na pasta nginx  que vai ter dockerfile lá.
+    build: ./nginx
+    # Vamos dá um nome ao container
+    container_name: nginx
+    # Caso ela morra, ele suba novamente
+    restart: always
+    tty: true
+    # OU seja na minha máquina ao digitar a ponto 9100 ele vai redirecionar para porta 80 do meu nginx
+    ports:
+      - "8000:80"
+    # Quer dizer tudo que dizer na minha pasta app vai ser compartilhado com a pasta WWW
+    #já que tenho volumes agora vou definir uma rede, porque criar uma rede ? para fazer com que esses container fale um com outro
+    volumes:
+      - ./app/:/var/www
+    #Aqui rede que vou conectar entre os containers  
+    networks:
+      - app-network
+
+  #Redis Service
+  redis:
+    image: redis:alpine
+    expose:
+      - 6379
+    restart: always
+
+     
+
+  #MySQL Service
+  db:
+    image: mysql:5.7
+    # Esse comando essencial algumas versão do docker para não dá erro no login do mysql
+    command: --innodb-use-native-aio=0
+    # Nome do Container
+    container_name: db
+    # Caso  ele caia ele suba novamente
+    restart: always
+    tty: true
+    ports:
+      - "33600:3306"
+    environment:
+      - MYSQL_DATABASE=laravel
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=root
+    # Aqui copia os dados no mysql que está no container para uma pasta local do meu computador, assim se eu deletar o container não perco os dados do banco.
+    networks:
+    volumes:
+      - ./.docker/dbdata:/var/lib/mysql
+    # Rede que ele faz parte para se comunicar com outros containers
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", 'mysql -uroot --database=laravel --password=root --execute="SELECT count(table_name) > 0 FROM information_schema.tables;" --skip-column-names -B']
+      interval: 10s
+      timeout: 10s
+      retries: 4
+
+networks:
+  app-network:
+    driver: bridge
