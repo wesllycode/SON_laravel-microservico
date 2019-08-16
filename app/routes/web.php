@@ -17,5 +17,5 @@
 //
 //Auth::routes(['register' => false]);
 Route::get('/', function () {
-    return ['auth1','auth2'];
+    return ['Servidor','On-line'];
 });
