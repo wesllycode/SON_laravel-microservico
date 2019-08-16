@@ -12,8 +12,8 @@ services:
     #Opção da versão do linux Alpine, esse alpine é bom porque ele simples e muito leve
     working_dir: /application
     restart: always
-    volumes:
-     - ./app/:/var/www
+    #volumes:
+    # - ./app/:/var/www
     networks:
       - app-network
     environment:
