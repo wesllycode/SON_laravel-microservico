@@ -37,26 +37,26 @@ steps:
   - '-c'
   - '/var/www/phpunit.xml'
 
-  - id: "Remover .env"
-    name: 'gcr.io/cloud-builders/docker'
-    args:
-    - 'exec'
-    - '-t'
-    - 'app'
-    - 'rm'
-    - '-f'
-    - '-f'
-    - '/var/www/.env'
+- id: "Removing .env"
+  name: 'gcr.io/cloud-builders/docker'
+  args:
+  - 'exec'
+  - '-t'
+  - 'app'
+  - 'rm'
+  - '-f' 
+  - '-f' 
+  - '/var/www/.env'
 
-  - id: "Renomeando Imagem"
-    name: 'gcr.io/cloud-builders/docker'
-    args: ['tag', 'workspace_app:latest', 'gcr.io/$PROJECT_ID/sso:$SHORT_SHA']
-  
-  - id: "Upando Image"
-    name: 'gcr.io/cloud-builders/docker'
-    args: ['push','gcr.io/$PROJECT_ID/sso:$SHORT_SHA']
+- id: "Rename image"
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['tag', 'workspace_app:latest', 'gcr.io/$PROJECT_ID/sso:$SHORT_SHA']
 
-  - id: Ajust deployment for kubectl
+- id: "Pushing  Image"
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['push','gcr.io/$PROJECT_ID/sso:$SHORT_SHA']
+
+- id: Ajust deployment for kubectl
   name: 'gcr.io/cloud-builders/gcloud'  
   entrypoint: '/bin/sh'  
   args:
@@ -64,7 +64,6 @@ steps:
     - |
       sed 's#img-app-deployment#gcr.io/$PROJECT_ID/sso:$SHORT_SHA#g' ./k8s/app-deployment.yaml > k8s/app-deployment-new.yaml; 
       cat k8s/app-deployment-new.yaml;
-
 - id: "Deploying to kubernetes"
   name: 'gcr.io/cloud-builders/kubectl'
   args: 
@@ -74,6 +73,6 @@ steps:
   env:
   - 'CLOUDSDK_COMPUTE_ZONE=us-central1-a'
   - 'CLOUDSDK_CONTAINER_CLUSTER=standard-cluster-1'
-
+  
 images:
 - 'gcr.io/$PROJECT_ID/docker-compose:latest'
