@@ -17,5 +17,5 @@
 //
 //Auth::routes(['register' => false]);
 Route::get('/', function () {
-    return ['Servidor','On-line','Google Cloud','Nginx XD'];
+    return ['Servidor','On-line','Google Cloud','Nginx'];
 });
