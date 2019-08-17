@@ -56,7 +56,7 @@ steps:
     name: 'gcr.io/cloud-builders/docker'
     args: ['push','gcr.io/$PROJECT_ID/sso:$SHORT_SHA']
 
-    - id: Ajust deployment for kubectl
+  - id: Ajust deployment for kubectl
   name: 'gcr.io/cloud-builders/gcloud'  
   entrypoint: '/bin/sh'  
   args:
@@ -74,6 +74,6 @@ steps:
   env:
   - 'CLOUDSDK_COMPUTE_ZONE=us-central1-a'
   - 'CLOUDSDK_CONTAINER_CLUSTER=standard-cluster-1'
-  
+
 images:
 - 'gcr.io/$PROJECT_ID/docker-compose:latest'
